@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <p id="userName"></p>
+    <div class="flex">
+      <div class="flex-child">
+        <form>
+          <input id="roomName" />
+          <button id="createRoom">Create</button>
+        </form>
+      </div>
+      <div class="flex-child" id="room-holder"></div>
+    </div>
+    <div class="flex" id="chatRoom" class="hidden">
+      <div class="flex-child">
+        <p id="chat-name"></p>
+        <ul id="chat-user-list"></ul>
+      </div>
+      <div class="flex-child">
+          <input id="chat-message" />
+          <button class="message-send">Send</button>
+          <div id="chat-window">
+
+          </div>
+        </div>
+    </div>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+
+  <script>
+    (function() {
+      var socket = io.connect("http://localhost:3001");
+      const name = "Anon" + Math.floor(Math.random() * 100);
+      document.getElementById("userName").innerHTML = name;
+      socket.emit("change_username", { userName: name });
+
+      document
+        .getElementById("createRoom")
+        .addEventListener("click", function(e) {
+          e.preventDefault();
+          const roomName = document.getElementById("roomName").value;
+          socket.emit("createGame", { roomName: roomName });
+        });
+
+      socket.on("roomsUpdated", function(data) {
+        const roomDiv = document.getElementById("room-holder");
+        roomDiv.innerHTML = "";
+        data.rooms.forEach(room => {
+          roomDiv.innerHTML += `
+        <div>
+          <p>Room: ${room.name} created by: ${room.creator}</p>`;
+          roomDiv.innerHTML += `
+        <ul>`;
+          room.users.forEach(user => (roomDiv.innerHTML += `<li>${user}</li>`));
+          roomDiv.innerHTML += `
+        </ul>
+          ${
+            room.creator !== name
+              ? `<button class="join-room" data-key="${room.name}">Join</button>`
+              : ""
+          }
+          ${
+            room.users.includes(name)
+              ? `<button class="leave-room" data-key="${room.name}">Leave</button>`
+              : ""
+          }
+        </div>`;
+        });
+      });
+
+      socket.on("enterRoom", function(data) {
+        document.getElementById("chatRoom").classList.remove("hidden");
+        document.getElementById("chat-name").innerHTML = data.roomData.name;
+        data.roomData.users.forEach(user => {
+          document.getElementById("chat-user-list").innerHTML += `<li>${user}</li>`;
+        })
+      });
+
+      socket.on("leaveRoom", function(data) {
+        document.getElementById("chat-name").innerHTML = "";
+        document.getElementById("chat-user-list").innerHTML = "";
+        document.getElementById("chatRoom").classList.add("hidden");
+      });
+
+      document.addEventListener("click", function(e) {
+        if (e.target.classList.contains("join-room")) {
+          socket.emit("joinGame", { room: e.target.dataset.key, name: name });
+        }
+        if (e.target.classList.contains("leave-room")) {
+          socket.emit("leaveGame", { room: e.target.dataset.key, name: name });
+        }
+        if (e.target.classList.contains("message-send")) {
+          let message = name + ": " + document.getElementById("chat-message").value;
+          socket.emit("sendMessage", { room: document.getElementById("chat-name").innerHTML, message: message });
+        }
+      });
+
+      socket.on("userJoined", function(data){
+        document.getElementById("chat-user-list").innerHTML = "";
+        data.roomData.users.forEach(user => {
+          document.getElementById("chat-user-list").innerHTML += `<li>${user}</li>`;
+        })
+      });
+
+      socket.on("messageReceived", function(data){
+        let y = document.getElementById("chat-window");
+        y.innerHTML = "" ;
+        data.roomData.messages.forEach(message => {
+          y.innerHTML += `<p>${message}<p>`;
+        });
+      })
+    })();
+  </script>
+</html>

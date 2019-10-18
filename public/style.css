@@ -1,0 +1,20 @@
+.flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-child {
+  width: 50%;
+  border: 1px solid blue;
+}
+
+.hidden {
+  display: none !important;
+  visibility:hidden;
+}
+
+
+#chatRoom{
+  margin-top: 5em;
+  border: 1px solid green;
+}
