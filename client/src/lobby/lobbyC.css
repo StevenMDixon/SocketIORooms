@@ -1,0 +1,14 @@
+*{
+  box-sizing: border-box;
+}
+
+.lobby-wrapper{
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.lobby-game-selector{
+  flex-basis: 70%;
+  height: 100%;
+}
