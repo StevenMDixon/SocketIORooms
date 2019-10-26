@@ -1,4 +1,5 @@
 const gameTracker = {
+  users: [],
   games: [
     {name: "waitingRoom", messages: [], users: []}
   ],
@@ -7,11 +8,42 @@ const gameTracker = {
     this.games.forEach(game => {
       if(game.name === "waitingRoom"){
         game.users.push(user);
+        game.messages.push(user+" joined room.")
         success = true;
       }
     });
     return success;
   },
+  addMessage: function(message, room){
+    this.games.forEach(game => {
+      if(game.name === room) {
+        if(game.messages) game.messages.push(message);
+        else {
+          game.messages = [message];
+        }
+      }
+    })
+  },
+  addUsers: function(username){
+    this.users.push(username);
+  },
+  removeUser: function(username){
+    let gameToRemove = null;
+    let usersAffected = [];
+    this.games.forEach(game => {
+      if(game.creator === username){
+        gameToRemove = game.name;
+        usersAffected = game.users.filter(user => user != username);
+      }
+      if(game.users.includes(username)){
+        game.users = game.users.filter(user => user != username);
+      }
+    });
+    this.users = this.users.filter(user => user != username);
+    this.games = this.games.filter(game => game.name != gameToRemove);
+    return {usersAffected};
+  },
+  // NEED TO REWORK
 
   addGame: function(gameName, creator){
     if(!gameName || this.games.some(x => x.name === gameName || x.creator === creator)){
@@ -45,16 +77,7 @@ const gameTracker = {
     });
     return success;
   },
-  addMessage: function(message, room){
-    this.games.forEach(game => {
-      if(game.name === room) {
-        if(game.messages) game.messages.push(message);
-        else {
-          game.messages = [message];
-        }
-      }
-    })
-  }
+  
 }
 
 module.exports = gameTracker;

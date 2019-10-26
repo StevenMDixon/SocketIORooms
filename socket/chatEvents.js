@@ -2,8 +2,6 @@ const gameTracker = require("./gameObject");
 
 function chatEvents(socket, io){
   socket.on('sendMessage', function(data){
-    console.log(data)
-    //console.log(io.sockets.manager.roomClients[socket.id])
       let roomData = getRoomData(data.room);
       gameTracker.addMessage(`${data.user}: ${data.message}`, data.room);
       socket.emit('messageReceived', {...roomData})
@@ -14,7 +12,6 @@ function chatEvents(socket, io){
     if(socket.userName == "Anon"){
       socket.userName = data.user;
     }
-
     if(gameTracker.joinWaitingRoom(socket.userName)){
       let roomData = getRoomData("waitingRoom");
       socket.join("waitingRoom");
@@ -66,9 +63,13 @@ function chatEvents(socket, io){
 module.exports = chatEvents;
 
 function getRoomData(roomName){
-  return {...gameTracker.games.filter(x => x.name === roomName)[0]}
+  let game = gameTracker.games.filter(x => x.name === roomName)[0];
+  // throttle the number of messages that are sent to the client
+  game.chat = game.messages.slice(Math.max(game.messages.length - 100,0), game.messages.length);
+  // send return the found game;
+  return {...game}
 }
 
-function updateWaitingRoom(io) {
-  io.in('waitingRoom').emit('roomsUpdated', {rooms: gameTracker.games});
+function updateRoom(io) {
+  io.in('waitingRoom').emit('roomsUpdated', {rooms: gameTracker.games, });
 }

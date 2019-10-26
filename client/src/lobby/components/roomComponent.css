@@ -1,0 +1,101 @@
+
+.room-wrapper{
+  flex-basis: 70%;
+  height: 100%;
+  border: 1px solid black;
+  margin: 0 1em;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.room-banner{
+  
+}
+
+.room-banner-left {
+  flex-basis: 75%;
+  padding: 1em;
+}
+
+.room-banner-right {
+  flex-basis: 25%;
+  padding: 1em;
+}
+
+.room-info-wrapper{
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.room-info{
+  flex-basis: 75%;
+  border-right: 1px solid black;
+  height: 95%;
+  padding: 0 .7em;
+  position: relative;
+}
+
+.room-users{
+  flex-basis: 25%;
+  height: 92%;
+}
+
+.user-list{
+  overflow-y: scroll;
+  margin: .7em;
+  height: 100%;
+}
+
+.room-info-header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+  justify-content: space-around;
+}
+
+.room-info-header::after{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 95%;
+  height: 3px;
+  background-color: rgb(66, 66, 66); 
+}
+
+.room-info-list {
+  height: 80%;
+  overflow-y: scroll;
+}
+
+.room-info-item{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.list-item-fix {
+  margin: .8em;
+  flex: 1;
+  text-align: left;
+}
+
+.room-info-buttons{
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 50%;
+  display: flex;
+  justify-content: space-around;
+  margin: 1em;
+}
+
+.room-info-button{
+  background-color: rgb(44, 44, 44);
+  color: white;
+  border: none;
+  padding: 1em .7em;
+  border-radius: 5px;
+}
