@@ -13,13 +13,14 @@ function config(server) {
       socket.userName = data.userName;
       gameTracker.users.push(data.userName);
       io.emit("usersUpdated", gameTracker.users);
+      io.emit("roomsUpdated", gameTracker.games);
     });
 
     // handle events related to chat functionality
     chatEvents(socket, io);
 
     // handle events related to game functionality
-    //gameEvents(socket, io);
+    // gameEvents(socket, io);
 
 
     socket.on('disconnect', ()=> {

@@ -1,41 +1,66 @@
 import React, { Component } from 'react';
 import "./roomComponent.css";
+import WaitingRoomComponent from './waitingRoomComponent';
+import GameRoomComponent from "./gameRoomComponent";
 
 class RoomComponent extends Component {
   constructor() {
     super();
     this.state = {
-      gamesTest: [
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-        {creator: "jim", users: ["jim"], name: "horsecrap"},
-      ]
+      rooms: [],
+      modalOpen: false,
+      gameName: "",
+      modalError: "",
+      clickedGameElement: null,
+      screen: "lobby"
     }
   }
 
   getGames = () => {
     // get the games but put the newer ones at the top
-    return this.state.gamesTest.reverse();
+    //return this.props.games.reverse();
+    return this.props.games;
   }
 
   componentDidMount() {
+    
+  }
+
+  selectGame = (gameID) => {
+    this.setState({clickedGameElement: gameID});
+  }
+
+  changeGameNameText = (e) => {
+    this.setState({ gameName: e.target.value });
+  }
+
+  createNewGameClicked = () => {
+    // should open a modal
+    this.setState({ modalOpen: !this.state.modalOpen});
+  }
+
+  submitNewGame = () => {
+    if(this.state.gameName === ""){
+      this.setState({modalError: "Error: Game name can not be blank"})
+    }
+    else if (this.props.games.filter(x => x.name === this.state.gameName).length > 0){
+      this.setState({modalError: "Error: Game Name Already Taken"})
+    }
+    else if (/[^\w\d]/.test(this.state.gameName)){
+      this.setState({modalError: "Error: Room cannot contain non alphanumeric characters"})
+    }
+    else {
+      // handle sending new game to be made
+      this.setState({modalOpen: false, modalError: "", screen: "gameCreated"});
+      this.props.socket.emit("createGame", {userName: this.props.user, roomName: this.state.gameName});
+    }
+  }
+
+  closeModal = () => {
+    this.setState({modalOpen: false, modalError: "", gameName: ""});
+  }
+
+  joinGame = () => {
 
   }
 
@@ -43,40 +68,50 @@ class RoomComponent extends Component {
   render() {
     return (
       <div className="room-wrapper">
-        <div className="lobby-banner room-banner">
-          <p className="room-banner-left">ACTIVE GAMES ({this.getGames().length})</p>
-          <p className="room-banner-right">ACTIVE PLAYERS ({this.props.users.length})</p>
-        </div>
-        <div className="room-info-wrapper">
-          <div className="room-info">
-            <div className="room-info-header">
-              <p className="list-item-fix">Players</p>
-              <p className="list-item-fix">User</p>
-              <p className="list-item-fix">Room Name</p>
+      {this.state.screen === "lobby" ?
+        <WaitingRoomComponent 
+        users = {this.props.users}
+        state = {this.state}
+        getGames ={this.getGames}
+        createNewGameClicked = {this.createNewGameClicked}
+        changeGameNameText = {this.changeGameNameText}
+        closeModal = {this.closeModal}
+        submitNewGame = {this.submitNewGame}
+        selectGame = {this.selectGame}
+        joinGame = {this.joinGame}
+        />
+        :
+        <GameRoomComponent users={this.props.users} state = {this.state}/>
+      }
+
+
+        {this.state.modalOpen ?
+          <div className="room-info-modal">
+            <div className="room-info-modal-title">
+              <p className="room-info-modal-title-text">CREATE A MULTIPLAYER GAME</p>
+              <p className="room-info-close-modal" onClick={this.closeModal}>X</p>
             </div>
-            <div className="room-info-list custom-scroll-bar">
-              {this.getGames().map(game => (
-              <div className="room-info-item">
-                <p className="list-item-fix">{game.users.length} / 2</p>
-                <p className="list-item-fix">{game.creator}</p>
-                <p className="list-item-fix">{game.name}</p>
-              </div>
-              ))}
+            <div className="room-info-modal-form">
+              <label for="game-name"><h4>Give the game a name</h4></label>
+              <input name="game-name" value={this.state.gameName} onChange={this.changeGameNameText}></input>
+              <p className="room-info-modal-error-message">{this.state.modalError}</p>
+              <button onClick={this.submitNewGame}>CREATE GAME</button>
             </div>
-            <div className="room-info-buttons">
-                <button className="room-info-button" onClick={(e)=>e}>PLAY SINGLE PLAYER</button>
-                <button className="room-info-button" onClick={(e)=>e}>CREATE A GAME</button>
-            </div>
-          </div>
-          <div className="room-users">
-            <div className="user-list custom-scroll-bar">
-              {this.props.users.map(user => <p className="user-list-item">{user}</p>)}
-            </div>
-          </div>
-        </div>
+          </div> : ""}
       </div>
     )
   }
 }
 
 export default RoomComponent;
+
+// todo
+
+/*
+  add a popup if room is full when trying to join? new popup? maybe use a popup to confirm joining the room?
+
+  create the created room component
+
+
+
+*/

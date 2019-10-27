@@ -18,12 +18,13 @@ class LobbyComponent extends Component {
   }
 
   componentDidMount(){
-    console.log(this.props)
+    // console.log(this.props)
     this.props.socket.emit("change_username", { userName: this.props.user });
 
     this.props.socket.on("roomsUpdated", (data) =>{
       //handle rooms changing
-      console.log(data);
+      console.log(data, "roomsUpdated");
+      this.setState({games: data})
     })
 
     this.props.socket.on("usersUpdated", (data)=>{

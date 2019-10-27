@@ -37,6 +37,7 @@ const gameTracker = {
       }
       if(game.users.includes(username)){
         game.users = game.users.filter(user => user != username);
+        game.messages.push(username + " has left the room");
       }
     });
     this.users = this.users.filter(user => user != username);
@@ -49,7 +50,7 @@ const gameTracker = {
     if(!gameName || this.games.some(x => x.name === gameName || x.creator === creator)){
       return false;
     } else {
-      this.games.push({name: gameName, creator: creator, users: [creator]});
+      this.games.push({name: gameName, creator: creator, users: [creator], messages: []});
       return true;
     }
   },

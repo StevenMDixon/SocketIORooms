@@ -23,15 +23,15 @@ function chatEvents(socket, io){
     }
   })
 
-  // socket.on('createGame', function(data){
-  //   if(gameTracker.addGame(data.roomName, socket.userName)){
-  //     updateWaitingRoom(io);
-  //     socket.join(data.roomName);
-  //     socket.emit("enterRoom", getRoomData(data.roomName));
-  //   } else {
-  //     socket.emit('waitingRoom').emit('err', {message: 'Room exists or incorrect name format'});
-  //   }
-  // });
+  socket.on('createGame', function(data){
+    if(gameTracker.addGame(data.roomName, socket.userName)){
+     updateWaitingRoom(io);
+     socket.join(data.roomName);
+     socket.emit("enterRoom", getRoomData(data.roomName));
+  } else {
+    socket.emit('waitingRoom').emit('err', {message: 'Room exists or incorrect name format'});
+  }
+  });
   
   // socket.on('joinGame', function(data){
   //   if(gameTracker.joinGame(data.room, data.name)){
@@ -65,11 +65,10 @@ module.exports = chatEvents;
 function getRoomData(roomName){
   let game = gameTracker.games.filter(x => x.name === roomName)[0];
   // throttle the number of messages that are sent to the client
-  game.chat = game.messages.slice(Math.max(game.messages.length - 100,0), game.messages.length);
   // send return the found game;
-  return {...game}
+  return {...game};
 }
 
-function updateRoom(io) {
-  io.in('waitingRoom').emit('roomsUpdated', {rooms: gameTracker.games, });
+function updateWaitingRoom(io) {
+  io.in('waitingRoom').emit('roomsUpdated', gameTracker.games);
 }

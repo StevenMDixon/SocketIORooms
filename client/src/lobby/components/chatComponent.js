@@ -22,11 +22,17 @@ class ChatComponent extends Component {
   sendMessage = () => {
     //console.log(this.state.chatName)
     this.props.socket.emit("sendMessage", { room: this.state.chatName, message: this.state.messageBoxValue, user: this.props.user});
-    this.setState({messages: [...this.state.messages, `${this.props.user}: ${this.state.messageBoxValue}`]});
+    this.setState({messages: [...this.state.messages, `${this.props.user}: ${this.state.messageBoxValue}`], messageBoxValue: ""});
   }
 
   updateMessageBox = (e) => {
     this.setState({messageBoxValue: e.target.value});
+  }
+
+  checkForEnter = (e) => {
+    if(e.keyCode === 13){
+      this.sendMessage();
+    }
   }
 
   componentDidMount(){
@@ -34,7 +40,6 @@ class ChatComponent extends Component {
 
 
     this.props.socket.on("enterRoom", (data) =>{
-      console.log(data)
       this.setState({chatName: data.name, messages: data.messages});
     })
 
@@ -46,6 +51,11 @@ class ChatComponent extends Component {
       console.log(data);
       this.setState({messages: data.messages});
     });
+
+    this.props.socket.on("roomsUpdated", (data) => {
+      console.log(typeof data)
+      data.forEach(room => room.name === this.state.chatName? this.setState({messages: room.messages}): null);
+    })
   }
 
   getMessages = () => {
@@ -59,10 +69,10 @@ class ChatComponent extends Component {
           <p className="chat-banner-title">CHAT</p>
         </div>
         <div className="message-output custom-scroll-bar" ref={el => this.messageList =el}>
-          {this.getMessages().map(message => <p className="message-items">{message}</p>)}
+          {this.getMessages().map((message, index) => <p key={"msg"+index} className="message-items">{message}</p>)}
         </div>
         <div className="message-inputs">
-          <input className="messageBox" value={this.state.messageBoxValue} onChange={this.updateMessageBox}></input>
+          <input className="messageBox" value={this.state.messageBoxValue} onChange={this.updateMessageBox} onKeyDown={this.checkForEnter}></input>
           <button onClick={this.sendMessage}>SEND</button>
         </div>
       </div> 
