@@ -1,7 +1,7 @@
 const gameTracker = {
   users: [],
   games: [
-    {name: "waitingRoom", messages: [], users: []}
+    {name: "waitingRoom", messages: ["lobby"], users: []}
   ],
   joinWaitingRoom: function(user){
     let success = false;
@@ -42,7 +42,7 @@ const gameTracker = {
     });
     this.users = this.users.filter(user => user != username);
     this.games = this.games.filter(game => game.name != gameToRemove);
-    return {usersAffected};
+    return {gameToRemove};
   },
   // NEED TO REWORK
 
@@ -67,19 +67,20 @@ const gameTracker = {
   },
 
   leaveGame: function(gameName, user){
-    let success = false;
+    let personLeft = null;
     this.games.forEach(game => {
       if(game.name === gameName && game.users.includes(user)){
-        if(game.creator === user && game.users.length === 1){
+        if(game.creator === user){
           this.games = this.games.filter(game => gameName !== game.name);
+          personLeft = "creator";
         }else{
           game.users = game.users.filter(name => name !== user );
-          game.messages.push(`${user} has left the room.`)
+          game.messages.push(`${user} has left the room.`);
+          personLeft = "user";
         }
-        success =  true;
       }
     });
-    return success;
+    return personLeft;
   },
   
 }

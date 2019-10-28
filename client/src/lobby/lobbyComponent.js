@@ -7,29 +7,42 @@ class LobbyComponent extends Component {
   constructor() {
     super();
     this.state = {
-      screen: "select",
       users: [],
       games: [],
       currentRoom: "waitingRoom",
+      screen: "lobby",
     }
   }
 
   componentDidMount() {
-    // console.log(this.props)
     this.props.socket.emit("change_username", { userName: this.props.user });
 
+    this.props.socket.on("screenChange", (data)=>{
+        this.setState(data);
+    });
+
+   
+
     this.props.socket.on("roomsUpdated", (data) => {
-      console.log(data);
-      //handle rooms 
-      if (data instanceof Array) {
-        return this.setState({ games: data });
-      }
+      console.log(this.state.currentRoom, "current room")
+      console.log(data)
 
       let currentRoom = this.state.currentRoom;
-
       if(data.newRoom){
         currentRoom = data.newRoom;
       }
+
+      if (data.updatedRooms) {
+        return this.setState({ games: data.updatedRooms, currentRoom});
+      }
+
+      if(data.remove){
+        return this.setState({
+          games: this.state.games.filter(game => game.name !== data.name),
+          currentRoom
+        })
+      }
+
 
       let matched = false;
 
@@ -52,12 +65,15 @@ class LobbyComponent extends Component {
       // signal sent from server tell client to update number of users
       this.setState({ users: data });
     })
+
+    this.props.socket.on("kicked", (data) => {
+      // signal sent from server tell client to update number of users
+      this.props.socket.emit("userThatGotKicked", this.state.currentRoom);
+    })
   }
 
   getCurrentRoomData = () => {
-    console.log(this.state.currentRoom)
     let t = this.state.games.filter(game => game.name === this.state.currentRoom);
-    console.log(t)
     if (t.length > 0) {
       return t[0];
     }
@@ -73,6 +89,7 @@ class LobbyComponent extends Component {
           users={this.state.users}
           games={this.state.games} 
           gameData={this.getCurrentRoomData()}
+          screen={this.state.screen}
           />
           
         <ChatComponent

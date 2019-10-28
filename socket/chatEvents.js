@@ -25,11 +25,13 @@ function chatEvents(socket, io) {
 
   socket.on('createGame', function (data) {
     if (gameTracker.addGame(data.room, data.user)) {
+      socket.leave("waitingRoom");
       socket.join(data.room);
       let room = getRoomData(data.room);
       room.messages.push(`${socket.userName} created room ${data.room}!`);
       socket.emit("roomsUpdated", { ...room, newRoom: data.room });
-      socket.to("waitingRoom").emit('roomsUpdated', { ...room });
+      socket.emit("screenChange", {screen: "UserCreatedGame"});
+      socket.to("waitingRoom").emit('roomsUpdated', {updatedRooms: gameTracker.games});
     } else {
       socket.emit('waitingRoom').emit('err', { message: 'Room exists or incorrect name format' });
     }
@@ -40,8 +42,10 @@ function chatEvents(socket, io) {
       let roomData = getRoomData(data.room);
       roomData.messages.push(`${socket.userName} joined room ${data.room}!`);
       socket.join(data.room);
+      socket.leave("waitingRoom");
       socket.emit("roomsUpdated", { ...roomData, newRoom: data.room });
-      socket.to(data.room).emit('roomsUpdated', roomData);
+      socket.emit("screenChange", {screen: "UserJoinedGame"});
+      io.emit('roomsUpdated', {...roomData});
     }
     else {
       socket.emit('join_err', { message: 'Sorry, The room is full!' });
@@ -49,16 +53,38 @@ function chatEvents(socket, io) {
   });
 
   socket.on('leaveGame', function (data) {
-    if (gameTracker.leaveGame(data.room, data.user)) {
-      let roomData = getRoomData(data.room);
+    let roomData = getRoomData(data.room);
+    let userLeft = gameTracker.leaveGame(data.room, data.user);
+    if (userLeft) {
+      socket.leave(data.room);
       socket.join('waitingRoom');
-      socket.emit("roomsUpdated", { ...roomData });
-      socket.to("waitingRoom").emit('roomsUpdated', { ...roomData });
+      socket.emit("screenChange", {screen: "lobby"});
+      roomData.users = roomData.users.filter(user => user !== data.user);
+
+      if(userLeft === "creator"){
+      // if the creator leaves all users need to be kicked
+        socket.emit("roomsUpdated", {...roomData, newRoom: "waitingRoom", remove: true});
+        // if the creator leaves all users need to be kicked
+        socket.to(data.room).emit("kicked");
+        //this.props.socket.emit("userThatGotKicked");
+      }
+      if(userLeft === "user"){
+        socket.emit("roomsUpdated", {updatedRooms: gameTracker.games, newRoom: "waitingRoom"});
+        socket.to(roomData.name).emit("roomsUpdated", {...roomData})
+      }
+      socket.to("waitingRoom").emit("roomsUpdated", {updatedRooms: gameTracker.games});
     }
     else {
       socket.emit('err', { message: 'Sorry, The room is full!' });
     }
   });
+
+  socket.on("userThatGotKicked", function(room){
+    socket.leave(room);
+    socket.join("waitingRoom");
+    socket.emit("screenChange", {screen: "lobby"});
+    socket.emit("roomsUpdated", {updatedRooms: gameTracker.games, newRoom: "waitingRoom", kicked: true});
+  }); 
 
 }
 

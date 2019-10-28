@@ -13,7 +13,7 @@ function config(server) {
       socket.userName = data.userName;
       gameTracker.users.push(data.userName);
       io.emit("usersUpdated", gameTracker.users);
-      io.emit("roomsUpdated", gameTracker.games);
+      io.emit("roomsUpdated", {updatedRooms: gameTracker.games});
     });
 
     // handle events related to chat functionality
@@ -21,16 +21,15 @@ function config(server) {
 
     // handle events related to game functionality
     // gameEvents(socket, io);
-
-
     socket.on('disconnect', ()=> {
       // remove user from all games and remove user created games
-      let {usersAffected} = gameTracker.removeUser(socket.userName);
-      usersAffected.forEach(user => {
-        gameTracker.joinWaitingRoom(user);
-      });
+      let {gameToRemove} = gameTracker.removeUser(socket.userName);
+      if(gameToRemove){
+        socket.to(gameToRemove).emit("kicked");
+      }else{
+        io.emit("roomsUpdated", {updatedRooms: gameTracker.games});
+      }
       io.emit("usersUpdated", gameTracker.users);
-      io.emit("roomsUpdated", gameTracker.games);
     })
   })
 

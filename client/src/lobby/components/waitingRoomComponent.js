@@ -1,12 +1,12 @@
 import React from 'react';
 
 
-function WaitingRoomComponent({users, state, getGames, selectGame, createNewGameClicked, joinGame}){
+function WaitingRoomComponent({users, state, getGames, selectGame, createNewGameClicked, joinGame, start}){
   return (
     <React.Fragment>
       <div className="lobby-banner room-banner">
         <p className="room-banner-left">ACTIVE GAMES ({getGames().length})</p>
-        <p className="room-banner-right">ACTIVE PLAYERS ({users.length})</p>
+        <p className="room-banner-right">PLAYERS({users.length})</p>
       </div>
       <div className="room-info-wrapper">
         <div className="room-info">
@@ -35,8 +35,8 @@ function WaitingRoomComponent({users, state, getGames, selectGame, createNewGame
             ))}
           </div>
           <div className="room-info-buttons">
-            <button className="room-info-button" onClick={(e) => e}>PLAY SINGLE PLAYER</button>
-            <button className="room-info-button" onClick={()=>createNewGameClicked()}>CREATE A GAME</button>
+            <button className="room-info-button" onClick={start}>PLAY SINGLE PLAYER</button>
+            <button className="room-info-button" onClick={createNewGameClicked}>CREATE A GAME</button>
           </div>
         </div>
         <div className="room-users">
