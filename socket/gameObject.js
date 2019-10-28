@@ -54,6 +54,7 @@ const gameTracker = {
       return true;
     }
   },
+
   joinGame: function(gameName, user){
     let success = false;
     this.games.forEach(game => {
@@ -64,6 +65,7 @@ const gameTracker = {
     });
     return success;
   },
+  
   leaveGame: function(gameName, user){
     let success = false;
     this.games.forEach(game => {

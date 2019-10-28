@@ -7,7 +7,6 @@ class RoomComponent extends Component {
   constructor() {
     super();
     this.state = {
-      rooms: [],
       modalOpen: false,
       gameName: "",
       modalError: "",
@@ -19,11 +18,15 @@ class RoomComponent extends Component {
   getGames = () => {
     // get the games but put the newer ones at the top
     //return this.props.games.reverse();
-    return this.props.games;
+    return this.props.games.filter(game => game.name !== "waitingRoom");
+  }
+
+  getCurrentGame = () =>{
+
   }
 
   componentDidMount() {
-    
+    console.log(this.props)
   }
 
   selectGame = (gameID) => {
@@ -52,7 +55,7 @@ class RoomComponent extends Component {
     else {
       // handle sending new game to be made
       this.setState({modalOpen: false, modalError: "", screen: "gameCreated"});
-      this.props.socket.emit("createGame", {userName: this.props.user, roomName: this.state.gameName});
+      this.props.socket.emit("createGame", {user: this.props.user, room: this.state.gameName});
     }
   }
 
@@ -60,8 +63,10 @@ class RoomComponent extends Component {
     this.setState({modalOpen: false, modalError: "", gameName: ""});
   }
 
-  joinGame = () => {
-
+  joinGame = (room) => {
+    console.log(this.props.user)
+    this.props.socket.emit("joinGame", {room, user: this.props.user});
+    this.setState({screen: "joinedGame"});
   }
 
 
@@ -74,17 +79,14 @@ class RoomComponent extends Component {
         state = {this.state}
         getGames ={this.getGames}
         createNewGameClicked = {this.createNewGameClicked}
-        changeGameNameText = {this.changeGameNameText}
-        closeModal = {this.closeModal}
-        submitNewGame = {this.submitNewGame}
         selectGame = {this.selectGame}
         joinGame = {this.joinGame}
         />
         :
-        <GameRoomComponent users={this.props.users} state = {this.state}/>
+        <GameRoomComponent 
+          gameData={this.props.gameData}
+        />
       }
-
-
         {this.state.modalOpen ?
           <div className="room-info-modal">
             <div className="room-info-modal-title">

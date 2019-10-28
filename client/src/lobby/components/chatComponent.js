@@ -20,9 +20,8 @@ class ChatComponent extends Component {
   }
 
   sendMessage = () => {
-    //console.log(this.state.chatName)
-    this.props.socket.emit("sendMessage", { room: this.state.chatName, message: this.state.messageBoxValue, user: this.props.user});
-    this.setState({messages: [...this.state.messages, `${this.props.user}: ${this.state.messageBoxValue}`], messageBoxValue: ""});
+    this.props.socket.emit("sendMessage", { room: this.props.gameData.name, message: this.state.messageBoxValue, user: this.props.user});
+    this.setState({messageBoxValue: ""});
   }
 
   updateMessageBox = (e) => {
@@ -37,29 +36,15 @@ class ChatComponent extends Component {
 
   componentDidMount(){
     this.props.socket.emit("joinWaitingRoom", {user: this.props.user});
-
-
-    this.props.socket.on("enterRoom", (data) =>{
-      this.setState({chatName: data.name, messages: data.messages});
-    })
-
-    this.props.socket.on("userJoined", (data) =>{
-      this.setState({messages: data.messages});
-    })
-
-    this.props.socket.on("messageReceived", (data) => {
-      console.log(data);
-      this.setState({messages: data.messages});
-    });
-
-    this.props.socket.on("roomsUpdated", (data) => {
-      console.log(typeof data)
-      data.forEach(room => room.name === this.state.chatName? this.setState({messages: room.messages}): null);
-    })
   }
 
   getMessages = () => {
-    return this.state.messages.slice(Math.max(this.state.messages.length - 100, 0),this.state.messages.length);
+    // check to see if we have the data from the server if not display no messages
+    if(!this.props.gameData.messages){
+      return []
+    }
+    let t = this.props.gameData.messages.slice(Math.max(this.props.gameData.messages.length - 100, 0),this.props.gameData.messages.length);
+    return t;
   }
 
   render() {

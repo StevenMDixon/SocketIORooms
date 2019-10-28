@@ -29,7 +29,6 @@ function config(server) {
       usersAffected.forEach(user => {
         gameTracker.joinWaitingRoom(user);
       });
-      console.log(gameTracker.users);
       io.emit("usersUpdated", gameTracker.users);
       io.emit("roomsUpdated", gameTracker.games);
     })

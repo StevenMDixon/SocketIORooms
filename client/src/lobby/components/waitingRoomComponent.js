@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-function WaitingRoomComponent({users, state, getGames, changeGameNameText, submitNewGame, selectGame, createNewGameClicked, joinGame}){
+function WaitingRoomComponent({users, state, getGames, selectGame, createNewGameClicked, joinGame}){
   return (
     <React.Fragment>
       <div className="lobby-banner room-banner">
@@ -24,7 +24,7 @@ function WaitingRoomComponent({users, state, getGames, changeGameNameText, submi
                 <p className="list-item-fix">{game.creator}</p>
                 <p className="list-item-fix">{game.name}</p>
               </div>
-              <button className="list-join-button" onClick={joinGame}>JOIN</button>
+              <button className="list-join-button" onClick={()=>joinGame(game.name)}>JOIN</button>
               </div>
               :
               <div className="room-info-item" onClick={()=>selectGame(game.name+index)} key={game.name+index}>
@@ -36,7 +36,7 @@ function WaitingRoomComponent({users, state, getGames, changeGameNameText, submi
           </div>
           <div className="room-info-buttons">
             <button className="room-info-button" onClick={(e) => e}>PLAY SINGLE PLAYER</button>
-            <button className="room-info-button" onClick={createNewGameClicked}>CREATE A GAME</button>
+            <button className="room-info-button" onClick={()=>createNewGameClicked()}>CREATE A GAME</button>
           </div>
         </div>
         <div className="room-users">

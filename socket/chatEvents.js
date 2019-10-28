@@ -4,8 +4,8 @@ function chatEvents(socket, io){
   socket.on('sendMessage', function(data){
       let roomData = getRoomData(data.room);
       gameTracker.addMessage(`${data.user}: ${data.message}`, data.room);
-      socket.emit('messageReceived', {...roomData})
-      socket.to(data.room).emit('messageReceived', {...roomData});
+      socket.emit('roomsUpdated', {...roomData});
+      socket.to(data.room).emit('roomsUpdated', {...roomData});
   });
 
   socket.on('joinWaitingRoom', function(data){
@@ -15,8 +15,8 @@ function chatEvents(socket, io){
     if(gameTracker.joinWaitingRoom(socket.userName)){
       let roomData = getRoomData("waitingRoom");
       socket.join("waitingRoom");
-      socket.emit("enterRoom", {...roomData});
-      socket.to("waitingRoom").emit('userJoined', {...roomData});
+      socket.emit("roomsUpdated", {...roomData});
+      socket.to("waitingRoom").emit('roomsUpdated', {...roomData});
     }
     else {
       socket.emit('err', {message: 'oh no'});
@@ -24,33 +24,35 @@ function chatEvents(socket, io){
   })
 
   socket.on('createGame', function(data){
-    if(gameTracker.addGame(data.roomName, socket.userName)){
-     updateWaitingRoom(io);
-     socket.join(data.roomName);
-     socket.emit("enterRoom", getRoomData(data.roomName));
+    if(gameTracker.addGame(data.room, data.user)){
+     socket.join(data.room);
+     let room = getRoomData(data.room);
+     room.messages.push(`${socket.userName} created room ${data.room}!`);
+     socket.emit("roomsUpdated", {...room, newRoom: data.room});
+     socket.to("waitingRoom").emit('roomsUpdated', {...room});
   } else {
     socket.emit('waitingRoom').emit('err', {message: 'Room exists or incorrect name format'});
   }
   });
   
-  // socket.on('joinGame', function(data){
-  //   if(gameTracker.joinGame(data.room, data.name)){
-  //     let roomData = getRoomData(data.room);
-  //     updateWaitingRoom(io);
-  //     socket.join(data.room);
-  //     socket.emit("enterRoom", roomData);
-  //     socket.to(data.room).emit('userJoined', roomData);
-  //   }
-  //   else {
-  //     socket.emit('err', {message: 'Sorry, The room is full!'});
-  //   }
-  // });
+  socket.on('joinGame', function(data){
+    if(gameTracker.joinGame(data.room, data.user)){
+      let roomData = getRoomData(data.room);
+      roomData.messages.push(`${socket.userName} joined room ${data.room}!`);
+      socket.join(data.room);
+      socket.emit("roomsUpdated", {...roomData, newRoom: data.room});
+      socket.to(data.room).emit('roomsUpdated', roomData);
+    }
+    else {
+      socket.emit('join_err', {message: 'Sorry, The room is full!'});
+    }
+  });
   
   // socket.on('leaveGame', function(data){
   //   let t = gameTracker.leaveGame(data.room, data.name);
   //   if(t){
   //     socket.join('waitingRoom');
-  //     updateWaitingRoom(io);
+  // 
   //     socket.emit("leaveRoom", getRoomData(data.room));
   //   }
   //   else {
@@ -67,8 +69,4 @@ function getRoomData(roomName){
   // throttle the number of messages that are sent to the client
   // send return the found game;
   return {...game};
-}
-
-function updateWaitingRoom(io) {
-  io.in('waitingRoom').emit('roomsUpdated', gameTracker.games);
 }
