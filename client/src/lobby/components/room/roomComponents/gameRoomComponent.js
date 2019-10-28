@@ -1,8 +1,9 @@
 import React from "react";
 import "./gameRoomComponent.css"
 
+
+// visual component for game room where 2 players are ready to start a game
 function GameRoomComponent({ gameData, leaveGame, screen, start}) {
-  console.log(gameData)
   return (
     <React.Fragment>
       <div className="lobby-banner room-banner">

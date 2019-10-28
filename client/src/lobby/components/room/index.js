@@ -7,41 +7,44 @@ class RoomComponent extends Component {
   constructor() {
     super();
     this.state = {
+      // modal for game creation flag
       modalOpen: false,
+      // controlled input for game creation
       gameName: "",
+      // error messaged from user trying to create game
       modalError: "",
+      // element from list of available rooms the user has clicked on
       clickedGameElement: null,
     };
   }
 
   getGames = () => {
     // get the games but put the newer ones at the top
-    //return this.props.games.reverse();
-    return this.props.games.filter(game => game.name !== "waitingRoom");
+    return this.props.games.filter(game => game.name !== "waitingRoom").reverse();
   };
 
-  componentDidMount() {
-    this.props.socket.on("playerReady", (data) =>{
-      if(!this.state.playersReady.includes(data.user)){
-        this.setState({playersReady: [...this.state.playersReady, data.user]});
-      }
-    })
-  }
+  componentDidMount() {}
 
   selectGame = gameID => {
+    // sets the clicked game room when a player clicks on an element shows the join room
     this.setState({ clickedGameElement: gameID });
   };
 
   changeGameNameText = e => {
+    // matches the controlled elements value with state
     this.setState({ gameName: e.target.value });
   };
 
   createNewGameClicked = () => {
-    // should open a modal
+    // opens modal for creating a  game
     this.setState({ modalOpen: !this.state.modalOpen });
   };
 
   submitNewGame = () => {
+    // validation for creating a new game
+    // check that game name is not empty
+    // game name does not exist
+    // and all characters are alphanumeric
     if (this.state.gameName === "") {
       this.setState({ modalError: "Error: Game name can not be blank" });
     } else if (
@@ -53,8 +56,9 @@ class RoomComponent extends Component {
         modalError: "Error: Room cannot contain non alphanumeric characters"
       });
     } else {
-      // handle sending new game to be made
+      // closes the modal and removes all set items
       this.setState({ modalOpen: false, modalError: "", gameName: ""});
+      // handle sending new game to be made on the backend
       this.props.socket.emit("createGame", {
         user: this.props.user,
         room: this.state.gameName,
@@ -63,14 +67,17 @@ class RoomComponent extends Component {
   };
 
   closeModal = () => {
+    // closes the game creation modal
     this.setState({ modalOpen: false, modalError: "", gameName: "" });
   };
 
   joinGame = room => {
+    // send join room event to back end, this is handled in the lobby component
     this.props.socket.emit("joinGame", { room, user: this.props.user });
   };
 
   leaveGame = room => {
+    // send leave room event to back end, this is handled in the lobby component
     this.props.socket.emit("leaveGame", { room, user: this.props.user });
   };
 
@@ -139,14 +146,3 @@ class RoomComponent extends Component {
 }
 
 export default RoomComponent;
-
-// todo
-
-/*
-  add a popup if room is full when trying to join? new popup? maybe use a popup to confirm joining the room?
-
-  create the created room component
-
-
-
-*/

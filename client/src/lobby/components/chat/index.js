@@ -5,9 +5,8 @@ class ChatComponent extends Component {
   constructor(){
     super();
     this.state = {
+      // input box for messaging
       messageBoxValue: "",
-      chatName: "waitingRoom",
-      messages: []
     }
   }
 
@@ -16,25 +15,31 @@ class ChatComponent extends Component {
   }
 
   scrollToBottom = () => {
+    // scrolls to the bottom of the messages div when the page is loaded or changed
     this.messageList.scrollTop = this.messageList.scrollHeight;
   }
 
   sendMessage = () => {
+    // handles sending the data to the back end via socket io, this will be sent back in the lobby component and passed down
     this.props.socket.emit("sendMessage", { room: this.props.gameData.name, message: this.state.messageBoxValue, user: this.props.user});
+    // empty the message input
     this.setState({messageBoxValue: ""});
   }
 
   updateMessageBox = (e) => {
+    // handles matching messages input element and state
     this.setState({messageBoxValue: e.target.value});
   }
 
   checkForEnter = (e) => {
+    // handle when user hits enter in the input box for messages
     if(e.keyCode === 13){
       this.sendMessage();
     }
   }
 
   componentDidMount(){
+    // move connected user into the waiting room as a default
     this.props.socket.emit("joinWaitingRoom", {user: this.props.user});
   }
 
@@ -43,8 +48,7 @@ class ChatComponent extends Component {
     if(!this.props.gameData.messages){
       return []
     }
-    let t = this.props.gameData.messages.slice(Math.max(this.props.gameData.messages.length - 100, 0),this.props.gameData.messages.length);
-    return t;
+    return this.props.gameData.messages.slice(Math.max(this.props.gameData.messages.length - 100, 0),this.props.gameData.messages.length);
   }
 
   render() {

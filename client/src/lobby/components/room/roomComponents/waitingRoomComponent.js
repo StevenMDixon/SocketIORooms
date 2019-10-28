@@ -1,6 +1,6 @@
 import React from 'react';
 
-
+// visual component for when a player is creating or joining a game
 function WaitingRoomComponent({users, state, getGames, selectGame, createNewGameClicked, joinGame, start}){
   return (
     <React.Fragment>

@@ -1,5 +1,5 @@
 import React from 'react';
-import LobbyComponent from './lobby/lobbyComponent';
+import LobbyComponent from './lobby';
 import socketIOClient from 'socket.io-client';
 import "./App.css";
 
