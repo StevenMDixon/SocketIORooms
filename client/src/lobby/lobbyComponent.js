@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import ChatComponent from './components/chatComponent';
-import RoomComponent from './components/roomComponent';
+import ChatComponent from './components/chat';
+import RoomComponent from './components/room';
 import "./lobbyC.css";
 
 class LobbyComponent extends Component {

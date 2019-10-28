@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./roomComponent.css";
-import WaitingRoomComponent from "./waitingRoomComponent";
-import GameRoomComponent from "./gameRoomComponent";
+import WaitingRoomComponent from "./roomComponents/waitingRoomComponent";
+import GameRoomComponent from "./roomComponents/gameRoomComponent";
 
 class RoomComponent extends Component {
   constructor() {
