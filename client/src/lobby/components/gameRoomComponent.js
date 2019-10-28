@@ -1,6 +1,6 @@
 import React from 'react';
 
-function GameRoomComponent({gameData}){
+function GameRoomComponent({gameData, leaveGame}){
   console.log(gameData)
   return (
     <React.Fragment>
@@ -10,7 +10,7 @@ function GameRoomComponent({gameData}){
       </div>
       <div className="room-info-wrapper">
         <div className="room-info">
-
+          <button onClick={()=>leaveGame(gameData.name)}>Leave</button>
         </div>
         <div className="room-users">
           <div className="user-list custom-scroll-bar">
@@ -23,3 +23,5 @@ function GameRoomComponent({gameData}){
 }
 
 export default GameRoomComponent;
+
+// need to handle the creator of the room leaving the room!

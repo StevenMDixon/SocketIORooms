@@ -69,6 +69,10 @@ class RoomComponent extends Component {
     this.setState({screen: "joinedGame"});
   }
 
+  leaveGame = (room) => {
+    this.props.socket.emit("leaveGame", {room, user: this.props.user});
+    this.setState({screen: "lobby"});
+  }
 
   render() {
     return (
@@ -81,10 +85,12 @@ class RoomComponent extends Component {
         createNewGameClicked = {this.createNewGameClicked}
         selectGame = {this.selectGame}
         joinGame = {this.joinGame}
+        leaveGame = {this.leaveGame}
         />
         :
         <GameRoomComponent 
           gameData={this.props.gameData}
+          leaveGame={this.leaveGame}
         />
       }
         {this.state.modalOpen ?

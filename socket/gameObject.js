@@ -65,7 +65,7 @@ const gameTracker = {
     });
     return success;
   },
-  
+
   leaveGame: function(gameName, user){
     let success = false;
     this.games.forEach(game => {
@@ -74,6 +74,7 @@ const gameTracker = {
           this.games = this.games.filter(game => gameName !== game.name);
         }else{
           game.users = game.users.filter(name => name !== user );
+          game.messages.push(`${user} has left the room.`)
         }
         success =  true;
       }
