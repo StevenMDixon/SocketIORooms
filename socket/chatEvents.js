@@ -122,7 +122,6 @@ function chatEvents(socket, io) {
     // tell socket that rooms are updated
     socket.emit("roomsUpdated", {updatedRooms: gameTracker.games, newRoom: "waitingRoom", kicked: true});
   }); 
-
 }
 
 module.exports = chatEvents;
